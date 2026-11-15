@@ -64,7 +64,7 @@
   <div class="wrap">
     <div class="eyebrow">English classroom · Miss Yahia · 2026/2027</div>
     <h1>Jeux & révisions</h1>
-    <p class="intro">Tes activités d'anglais au même endroit, pour réviser à ton rythme.</p>
+    <p class="intro">Tes activités d'anglais et de DNL au même endroit, pour réviser à ton rythme.</p>
   </div>
 </header>
 <main class="wrap">
@@ -106,25 +106,29 @@ const codeHashes = {
   "6e": "0a4e3e70597a358b9447fa8a647aadf5b76dde95c8e4ab02e5f8cee6caa1cd28",
   "5e": "0c9de27d6a59e0356abcc7b5127f362ebf23dc41edb5c45473fccb38d633c6c5",
   "3e": "87557ad1d2f9c36266be01980669ed8ba1b5375d552385b12db8cacd04a8f8d0",
-  "2nde": "255845886a7695c074cd467b2fc49bf6bd4406f857dc5fabe1c5aea130490af4",
-  "1ere": "a40c943151f1eebabdf85135c3de1005ec902fe787e29c2190df5e01e39222ce"
+  "2nde-anglais": "255845886a7695c074cd467b2fc49bf6bd4406f857dc5fabe1c5aea130490af4",
+  "2nde-dnl": "3fcda963bdda4c3e09f0410c43cedde418f7bf7c42b03e98cb1d603c8a433306",
+  "1ere-anglais": "a40c943151f1eebabdf85135c3de1005ec902fe787e29c2190df5e01e39222ce",
+  "1ere-dnl": "7e7ef09ddc7fee2f2e6f36389bd87aa103ae2fec1163ff1c9415ac15f9569c7f"
 };
-const levelLabels = {'6e':'6ème', '5e':'5ème', '3e':'3ème', '2nde':'2nde', '1ere':'1ère'};
+const levelLabels = {'6e':'6ème', '5e':'5ème', '3e':'3ème', '2nde-anglais':'2nde – Anglais', '2nde-dnl':'2nde – DNL Physique-Chimie', '1ere-anglais':'1ère – Anglais', '1ere-dnl':'1ère – DNL Physique-Chimie'};
 const account = 'MissTeacherNad';
 
-// Affectations prioritaires. Une activité commune peut apparaître dans plusieurs niveaux.
-// Pour une nouvelle activité sans niveau dans le nom, l'ajouter ici.
+// Sept espaces distincts : 6ème, 5ème, 3ème, 2nde Anglais, 2nde DNL,
+// 1ère Anglais et 1ère DNL. Une activité partagée peut figurer à plusieurs niveaux.
+// Pour un nouveau projet dont le niveau n'apparaît pas dans le nom, ajouter
+// son affectation à ce catalogue. Ne publier aucun code professeur sur GitHub.
 const catalog = {
-  'Lecture-debutant': {name:'Lecture débutant',levels:['6e'],type:'Lecture'},
-  'NigeriaReview': {name:'Nigeria on the Move',levels:['2nde'],type:'Révisions'},
-  'TheInvisibleBorder': {name:'The Invisible Border',levels:['1ere'],type:'Révisions'},
-  'atom-lockdown': {name:'Atom Lockdown',levels:['2nde','1ere'],type:'DNL physique-chimie'},
-  'periodic-table-trainer': {name:'Periodic Table Trainer',levels:['2nde','1ere'],type:'DNL physique-chimie'},
-  'GramLab': {name:'GramLab',levels:['5e','3e','2nde','1ere'],type:'Verbes irréguliers'},
-  'VerbesIrreg': {name:'Verbes irréguliers',levels:['5e','3e','2nde','1ere'],type:'Verbes irréguliers'}
+  'NigeriaReview': {name:'Nigeria on the Move',levels:['2nde-anglais'],type:'Révisions'},
+  'TheInvisibleBorder': {name:'The Invisible Border',levels:['1ere-anglais'],type:'Révisions'},
+  'atom-lockdown': {name:'Atom Lockdown',levels:['2nde-dnl','1ere-dnl'],type:'DNL Physique-Chimie'},
+  'periodic-table-trainer': {name:'Periodic Table Challenge',levels:['2nde-dnl','1ere-dnl'],type:'DNL Physique-Chimie'},
+  'GramLab': {name:'GramLab · Verbes irréguliers',levels:['5e','3e','2nde-anglais','1ere-anglais'],type:'Verbes irréguliers'},
+  // Ancien nom possible du dépôt GramLab : conserve le lien si le dépôt n'a pas été renommé.
+  'VerbesIrreg': {name:'GramLab · Verbes irréguliers',levels:['5e','3e','2nde-anglais','1ere-anglais'],type:'Verbes irréguliers'}
 };
-const ignored = new Set(['liens']);
-const knownFallback = ['Lecture-debutant','NigeriaReview','TheInvisibleBorder','atom-lockdown','periodic-table-trainer'];
+const ignored = new Set(['liens','lecturedebutant','lecturedebutants']);
+const knownFallback = ['NigeriaReview','TheInvisibleBorder','atom-lockdown','periodic-table-trainer'];
 const sections = document.getElementById('sections');
 const status = document.getElementById('status');
 let unlockedLevel = null;
@@ -139,28 +143,56 @@ function gradeFromText(text) {
   if(/6(?:eme|e|th)(?![a-z0-9])|sixieme/.test(s))grades.push('6e');
   if(/5(?:eme|e|th)(?![a-z0-9])|cinquieme/.test(s))grades.push('5e');
   if(/3(?:eme|e|rd)(?![a-z0-9])|troisieme/.test(s))grades.push('3e');
-  if(/2nde|seconde|secondes|2(?:eme|e)(?![a-z0-9])/.test(s))grades.push('2nde');
-  if(/1ere|premiere|premieres|1(?:eme|e)(?![a-z0-9])/.test(s))grades.push('1ere');
+  if(/2nde|seconde|secondes|2(?:eme|e)(?![a-z0-9])/.test(s))grades.push('2nde-anglais');
+  if(/1ere|premiere|premieres|1(?:eme|e)(?![a-z0-9])/.test(s))grades.push('1ere-anglais');
   return grades;
 }
 function classify(repo) {
-  if(ignored.has(normal(repo.name)))return null;
+  const name=normal(repo.name).replace(/[-_]/g,' ');
+  const compact=name.replace(/[^a-z0-9]/g,'');
+  const desc=normal(repo.description||'');
+  // Un dépôt personnel de lecture ne doit jamais être classé en 6ème.
+  if(ignored.has(compact)||/^lecturedebutant/.test(compact))return null;
   if(Object.prototype.hasOwnProperty.call(catalog,repo.name)) {
     return {...catalog[repo.name],description:repo.description||'Activité de révision.'};
   }
-  const name=normal(repo.name).replace(/[-_]/g,' ');
-  const desc=normal(repo.description||'');
+  if(/gramlab|verbesirreg|irregularverbs|verbesirreguliers/.test(compact)) {
+    return {name:'GramLab · Verbes irréguliers',levels:['5e','3e','2nde-anglais','1ere-anglais'],type:'Verbes irréguliers',description:repo.description||'Réviser les verbes irréguliers avec des exercices et des flashcards.'};
+  }
+  // Les activités connues sont classées par enseignement, pas seulement par année.
+  if(/englishtenses/.test(compact)) {
+    return {name:'English Tenses',levels:['2nde-anglais','1ere-anglais'],type:'Grammaire',description:repo.description||'Réviser les temps de l’anglais.'};
+  }
+  if(/atomlockdown/.test(compact)) {
+    return {name:'Atom Lockdown',levels:['2nde-dnl','1ere-dnl'],type:'DNL Physique-Chimie',description:repo.description||'Activité interactive de chimie en anglais.'};
+  }
+  if(/periodictable|periodicchallenge/.test(compact)) {
+    return {name:'Periodic Table Challenge',levels:['2nde-dnl','1ere-dnl'],type:'DNL Physique-Chimie',description:repo.description||'Réviser le tableau périodique en anglais.'};
+  }
+  if(/labmixup|dilution|dissolution/.test(compact)) {
+    return {name:repo.name.replace(/[-_]/g,' '),levels:['1ere-dnl'],type:'DNL Physique-Chimie',description:repo.description||'Réviser dilution et dissolution en anglais.'};
+  }
+  if(/spyschool|spyschool|spies|goldfist|recruit|johnnyenglish|spy\b/.test(compact)) {
+    return {name:repo.name.replace(/[-_]/g,' '),levels:['3e'],type:'Spies · Révisions',description:repo.description||'Activité interactive pour réviser.'};
+  }
+  if(/nigeria|lagos|afrobeats|nollywood|joe|diner/.test(compact)) {
+    return {name:repo.name.replace(/[-_]/g,' '),levels:['2nde-anglais'],type:'Révisions',description:repo.description||'Activité interactive pour réviser.'};
+  }
+  if(/nonsense|fool|harriet|invisibleborder/.test(compact)) {
+    return {name:repo.name.replace(/[-_]/g,' '),levels:['1ere-anglais'],type:'Révisions',description:repo.description||'Activité interactive pour réviser.'};
+  }
   let levels=[...new Set([...gradeFromText(name),...gradeFromText(desc)])];
-  let type='Activité interactive';
-  if(/spyschool|spy school|spies|goldfist|recruit|johnny english|spy\b/.test(name)) {levels=['3e'];type='Spies · Révisions';}
-  else if(/nigeria|lagos|afrobeats|nollywood|joe|diner|english tenses/.test(name)) {levels=['2nde'];type='Révisions';}
-  else if(/nonsense|fool|harriet|invisible border|invisibleborder/.test(name)) {levels=['1ere'];type='Révisions';}
-  else if(/addams|wednesday|manor/.test(name) && !levels.length) {levels=['6e'];type='Révisions';}
-  else if(/atom|periodic|dilution|dissolution|chemistry|lab mix/.test(name)) {levels=['2nde','1ere'];type='DNL physique-chimie';}
-  else if(/gramlab|irregular|irreg|verbs/.test(name)) {levels=['5e','3e','2nde','1ere'];type='Grammaire';}
-  else if(/halloween/.test(name))type='Halloween';
+  if(/addams|wednesday|welcometothemanor|manor/.test(compact)&&!levels.length)levels=['6e'];
+  const dnl=/(?:\bdnl\b|physique|chimie|chemistry|chemical|\batom\b|periodic|dilution|dissolution|lab mix)/.test(name+' '+desc);
+  if(dnl) {
+    // Aucune affectation automatique aux deux DNL si le niveau exact est inconnu.
+    levels=levels.map(x=>x==='2nde-anglais'?'2nde-dnl':x==='1ere-anglais'?'1ere-dnl':x);
+    levels=levels.filter(x=>x==='2nde-dnl'||x==='1ere-dnl');
+  }
+  if(!levels.length)return null; // Ne pas ajouter un projet au mauvais niveau.
+  let type=dnl?'DNL Physique-Chimie':'Activité interactive';
+  if(/halloween/.test(name))type='Halloween';
   else if(/grammar|grammaire|tenses/.test(name))type='Grammaire';
-  if(!levels.length)return null;  // Ne pas montrer par erreur les dépôts sans niveau identifié.
   return {name:repo.name.replace(/[-_]/g,' '),levels,type,description:repo.description||'Activité interactive pour réviser.'};
 }
 function repoToItem(repo) {
@@ -252,6 +284,11 @@ async function load() {
     const data=await response.json();
     if(grade!==unlockedLevel)return;
     currentRepos=data.filter(r=>!r.archived && !r.fork).map(repoToItem).filter(Boolean);
+    const gramCandidates=currentRepos.filter(r=>/^(gramlab|verbesirreg)$/i.test(r.name));
+    if(gramCandidates.length>1) {
+      const preferred=gramCandidates.find(r=>/^gramlab$/i.test(r.name))||gramCandidates[0];
+      currentRepos=currentRepos.filter(r=>!gramCandidates.includes(r)||r===preferred);
+    }
     currentRepos.sort((a,b)=>(a.meta.name||a.name).localeCompare(b.meta.name||b.name,'fr'));
     showStatus('Bibliothèque mise à jour à partir de tes activités GitHub publiques.');
   }catch(error) {
