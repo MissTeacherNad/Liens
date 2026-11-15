@@ -1,54 +1,266 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>English Classroom · Jeux et révisions</title>
-<style>
-:root{--ink:#283a50;--muted:#64748b;--blue:#456c8e;--line:#dbe5ec;--cream:#f7f9fa;--gold:#bd8458}
-*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',sans-serif}header{background:white;border-bottom:1px solid var(--line);padding:38px 20px 30px}.wrap{max-width:1080px;margin:auto}header .eyebrow{font-size:12px;letter-spacing:.18em;color:var(--gold);font-weight:750;text-transform:uppercase}h1{font-family:Georgia,serif;font-size:clamp(31px,5vw,49px);font-weight:normal;letter-spacing:-.035em;margin:8px 0 7px}header p{color:var(--muted);margin:0;line-height:1.6}.toolbar{padding:22px 0 6px;display:flex;gap:12px;flex-wrap:wrap}.search{flex:1;min-width:240px;padding:13px 16px;border:1px solid var(--line);border-radius:11px;background:white;font:inherit}.pill{border:1px solid var(--line);background:white;border-radius:30px;padding:11px 14px;color:var(--ink);font:inherit;cursor:pointer}.pill.active{background:var(--ink);border-color:var(--ink);color:white}.filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 25px}main{padding:0 20px 55px}.section{margin-bottom:32px}.section h2{font:normal 26px Georgia,serif;border-bottom:1px solid var(--line);padding-bottom:10px;margin:0 0 14px;display:flex;align-items:center;justify-content:space-between}.count{font:600 12px system-ui;color:var(--muted)}.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:13px}.card{background:white;border:1px solid var(--line);border-radius:13px;padding:18px;display:flex;flex-direction:column;gap:9px;min-height:160px}.tag{font-size:11px;color:var(--blue);font-weight:750;text-transform:uppercase;letter-spacing:.08em}.card h3{font-size:18px;font-weight:650;margin:0}.card p{font-size:13px;line-height:1.5;margin:0;color:var(--muted);flex:1}.actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:4px}.actions a{display:inline-block;text-decoration:none;background:#eaf0f5;color:#254660;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:700}.actions a.primary{background:var(--blue);color:white}.actions a:hover{filter:brightness(.93)}.note{color:var(--muted);font-size:13px;line-height:1.6;padding:12px 0}.empty{color:var(--muted);padding:20px;background:white;border:1px dashed var(--line);border-radius:12px}footer{border-top:1px solid var(--line);padding:25px 20px;color:var(--muted);font-size:12px;background:white}a{color:var(--blue)}@media(max-width:600px){header{padding-top:27px}.cards{grid-template-columns:1fr}.section h2{font-size:24px}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#354e69">
+  <meta name="description" content="English Classroom — ressources et activités de révision par niveau.">
+  <title>English Classroom · Jeux & révisions</title>
+  <style>
+    :root { --ink:#293c53; --navy:#354e69; --blue:#577c9d; --muted:#617083; --line:#dce3e9; --paper:#f7f8fa; --white:#fff; --accent:#efd8d5; --green:#317251; }
+    * {box-sizing:border-box}
+    body {margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;line-height:1.55}
+    button,input {font:inherit}
+    button {cursor:pointer}
+    a {color:inherit}
+    .wrap {width:min(1040px,calc(100% - 38px));margin:auto}
+    header {background:#fff;border-bottom:1px solid var(--line);padding:34px 0 27px}
+    .eyebrow {font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:#9a7370;font-weight:750}
+    h1 {font:normal clamp(2rem,5vw,3.05rem)/1.13 Georgia,"Times New Roman",serif;letter-spacing:-.03em;margin:8px 0 9px}
+    .intro {font-size:.95rem;color:var(--muted);margin:0;max-width:680px}
+    main {min-height:calc(100dvh - 240px);padding:31px 0 56px}
+    .gate {max-width:490px;margin:26px auto 45px;background:var(--white);border:1px solid var(--line);border-radius:18px;padding:30px 30px 26px;box-shadow:0 12px 28px #293c530b}
+    .gate-label {font-size:.72rem;font-weight:750;color:var(--blue);text-transform:uppercase;letter-spacing:.13em}
+    .gate h2 {font:normal 1.85rem Georgia,"Times New Roman",serif;margin:8px 0 9px}
+    .gate p {color:var(--muted);font-size:.92rem;margin:0 0 21px}
+    label {display:block;font-size:.88rem;font-weight:700;margin:0 0 8px}
+    .code-row {display:flex;gap:9px}
+    .code-row input {flex:1;min-width:0;padding:13px;border:1px solid #bccad6;border-radius:9px;outline-offset:2px;letter-spacing:.06em}
+    .code-row input:focus,.search:focus {outline:2px solid #7c9ebc;border-color:transparent}
+    .button {border:0;background:var(--navy);color:white;border-radius:9px;padding:11px 17px;font-weight:700;white-space:nowrap}
+    .button:hover {background:#263c53}
+    .button.secondary {background:#edf1f5;color:var(--navy)}
+    .button.secondary:hover {background:#dde8f0}
+    .error {color:#aa3744;font-size:.88rem;margin:11px 0 0;min-height:1.3em}
+    .privacy {display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.79rem;margin-top:15px}
+    .lock {font-size:1rem}
+    .library {display:none}
+    .library.on {display:block}
+    .topbar {display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:19px;flex-wrap:wrap}
+    .level-kicker {font-size:.77rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--blue)}
+    .level-name {font:normal 2.05rem Georgia,"Times New Roman",serif;margin:3px 0}
+    .toolbar {display:flex;gap:10px;flex-wrap:wrap}
+    .search {min-width:210px;flex:1;background:white;border:1px solid var(--line);border-radius:9px;padding:12px 14px}
+    .section {margin-top:27px}
+    .section-header {display:flex;align-items:end;gap:12px;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:9px;margin-bottom:15px}
+    .section h3 {font:normal 1.5rem Georgia,"Times New Roman",serif;margin:0}
+    .section-count {color:var(--muted);font-size:.8rem}
+    .cards {display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:13px}
+    .card {background:white;border:1px solid var(--line);border-radius:13px;padding:20px;display:flex;flex-direction:column;gap:9px;min-height:170px}
+    .tag {color:var(--blue);font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+    .card h4 {font-size:1.09rem;line-height:1.35;margin:0}
+    .card p {font-size:.86rem;line-height:1.5;color:var(--muted);margin:0;flex:1}
+    .card a {align-self:flex-start;display:inline-block;background:#eaf0f5;color:#294e6e;text-decoration:none;border-radius:8px;padding:9px 12px;font-size:.82rem;font-weight:700}
+    .card a:hover {background:#d9e6f0}
+    .status {color:var(--muted);font-size:.85rem;margin-top:13px}
+    .empty {padding:27px 20px;background:white;border:1px dashed #c5d2dc;border-radius:12px;color:var(--muted)}
+    footer {background:white;border-top:1px solid var(--line);padding:21px 0;color:var(--muted);font-size:.75rem}
+    [hidden] {display:none!important}
+    @media(max-width:570px) {.gate{padding:24px 19px;margin-top:5px}.code-row{flex-direction:column}.code-row .button{width:100%}.topbar{align-items:flex-start;flex-direction:column}.toolbar,.toolbar .search{width:100%}.cards{grid-template-columns:1fr}header{padding-top:25px}}
+  </style>
 </head>
 <body>
-<header><div class="wrap"><div class="eyebrow">English classroom · Resource library</div><h1>Jeux & révisions</h1><p>Toutes les activités au même endroit, classées par niveau. Recherche un titre, une notion ou une séquence.</p></div></header>
+<header>
+  <div class="wrap">
+    <div class="eyebrow">English classroom · Miss Yahia · 2026/2027</div>
+    <h1>Jeux & révisions</h1>
+    <p class="intro">Tes activités d'anglais au même endroit, pour réviser à ton rythme.</p>
+  </div>
+</header>
 <main class="wrap">
-<div class="toolbar"><input id="search" class="search" type="search" aria-label="Rechercher une activité" placeholder="Rechercher : Nigeria, Spies, grammar…"><button id="refresh" class="pill" type="button">↻ Actualiser les liens</button></div>
-<nav class="filters" id="filters" aria-label="Filtrer par niveau"></nav>
-<div id="status" class="note" role="status">Chargement des activités publiques…</div><div id="sections"></div>
+  <section id="gate" class="gate" aria-labelledby="gate-title">
+    <div class="gate-label">Espace élèves</div>
+    <h2 id="gate-title">Accéder à mes activités</h2>
+    <p>Entre les 4 chiffres donnés par ton professeur. Tu verras uniquement les activités de ton niveau.</p>
+    <form id="code-form">
+      <label for="code">Code d'accès</label>
+      <div class="code-row">
+        <input id="code" type="password" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" autocomplete="off" spellcheck="false" enterkeyhint="go" required placeholder="Code à 4 chiffres" aria-describedby="error">
+        <button class="button" type="submit">Entrer</button>
+      </div>
+      <div id="error" class="error" role="alert" aria-live="polite"></div>
+    </form>
+    <div class="privacy"><span class="lock" aria-hidden="true">⌁</span> Aucun compte personnel n'est nécessaire.</div>
+  </section>
+
+  <section id="library" class="library" aria-live="off" aria-label="Bibliothèque de révision">
+    <div class="topbar">
+      <div><div class="level-kicker">Mes activités</div><h2 id="level-name" class="level-name"></h2></div>
+      <button id="logout" type="button" class="button secondary">Changer de niveau</button>
+    </div>
+    <div class="toolbar">
+      <input id="search" class="search" type="search" placeholder="Rechercher une séquence, une notion…" aria-label="Rechercher une activité">
+      <button id="refresh" type="button" class="button secondary">↻ Actualiser</button>
+    </div>
+    <p id="status" class="status" role="status">Chargement des activités…</p>
+    <div id="sections"></div>
+  </section>
 </main>
-<footer><div class="wrap">Bibliothèque pédagogique · <a href="https://github.com/MissTeacherNad" target="_blank" rel="noopener noreferrer">Dépôts GitHub</a><br>Cette page répertorie les projets publics. Elle n'affiche aucune donnée d'élève.</div></footer>
+<footer><div class="wrap">Bibliothèque pédagogique · Activités classées par niveau · Aucune donnée personnelle d'élève collectée.</div></footer>
 <script>
 'use strict';
-const user='MissTeacherNad';
-const order=['6e','5e','3e','2nde','1ère','DNL','Outils & autres'];
-const catalog={
-'atom-lockdown':{name:'Atom Lockdown',level:'DNL',type:'Jeu en équipes',description:'Quiz sur les éléments du tableau périodique.'},
-'periodic-table-trainer':{name:'Periodic Table Trainer',level:'DNL',type:'Entraînement',description:'Réviser le tableau périodique.'},
-'Liens':{name:'Ancienne page de liens',level:'Outils & autres',type:'Navigation',description:'L’index initial des ressources.'},
-'Lecture-debutant':{name:'Lecture débutant',level:'6e',type:'Lecture',description:'Activité de lecture et d’écoute.'},
-'NigeriaReview':{name:'Nigeria on the Move · Review',level:'2nde',type:'Révisions',description:'Révisions de la séquence Nigeria on the Move.'},
-'TheInvisibleBorder':{name:'The Invisible Border',level:'1ère',type:'Révisions',description:'Documents, vocabulaire et entraînements de la séquence.'}
+
+// Codes conservés SOUS FORME D'EMPREINTES. Ne pas publier le fichier codes_professeur.txt.
+// Attention : sur un hébergement statique public, ce filtre n'est pas une authentification sécurisée.
+const codeHashes = {
+  "6e": "0a4e3e70597a358b9447fa8a647aadf5b76dde95c8e4ab02e5f8cee6caa1cd28",
+  "5e": "0c9de27d6a59e0356abcc7b5127f362ebf23dc41edb5c45473fccb38d633c6c5",
+  "3e": "87557ad1d2f9c36266be01980669ed8ba1b5375d552385b12db8cacd04a8f8d0",
+  "2nde": "255845886a7695c074cd467b2fc49bf6bd4406f857dc5fabe1c5aea130490af4",
+  "1ere": "a40c943151f1eebabdf85135c3de1005ec902fe787e29c2190df5e01e39222ce"
 };
-function classify(repo){const n=repo.name.toLowerCase();if(catalog[repo.name])return catalog[repo.name];
-if(/nigeria/.test(n))return {level:'2nde',type:'Révisions'};
-if(/sp(y|ies)|goldfist|recruit/.test(n))return {level:'3e',type:'Jeu / révisions'};
-if(/atom|periodic|chemistry|element/.test(n))return {level:'DNL',type:'Sciences'};
-if(/border|harriet|invisible/.test(n))return {level:'1ère',type:'Révisions'};
-if(/halloween/.test(n))return {level:'Outils & autres',type:'Halloween'};
-if(/grammar|grammaire|irregular|verb|tense/.test(n))return {level:'Outils & autres',type:'Grammaire'};
-if(/lecture|beginner/.test(n))return {level:'6e',type:'Lecture'};
-return {level:'Outils & autres',type:'Activité'};}
-let repos=[], filter='Tous', term='';
-function normal(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
-function node(tag,className,content){const el=document.createElement(tag);if(className)el.className=className;if(content!==undefined)el.textContent=content;return el;}
-function render(){const filters=document.getElementById('filters');filters.replaceChildren();for(const group of ['Tous',...order]){const b=node('button','pill'+(filter===group?' active':''),group);b.type='button';b.onclick=()=>{filter=group;render();};filters.append(b);}
-const target=document.getElementById('sections');target.replaceChildren();let shown=0;
-for(const level of order){if(filter!=='Tous'&&filter!==level)continue;const items=repos.filter(r=>r.meta.level===level&&normal([r.meta.name,r.name,r.meta.type,r.meta.description,level].join(' ')).includes(normal(term)));if(!items.length)continue;shown+=items.length;
-const section=node('section','section');const h=node('h2','',level);h.append(node('span','count',items.length+' activité'+(items.length>1?'s':'')));section.append(h);const cards=node('div','cards');
-for(const r of items){const card=node('article','card');card.append(node('div','tag',r.meta.type||'Activité'),node('h3','',r.meta.name||r.name),node('p','',r.meta.description||'Ressource pédagogique GitHub.'));const links=node('div','actions');if(r.pages){const a=node('a','primary','Ouvrir l’activité ↗');a.href=r.pages;a.target='_blank';a.rel='noopener noreferrer';links.append(a);}const repo=node('a','',r.pages?'Voir le dépôt':'Voir le projet ↗');repo.href=r.html_url;repo.target='_blank';repo.rel='noopener noreferrer';links.append(repo);card.append(links);cards.append(card);}section.append(cards);target.append(section);}
-if(!shown)target.append(node('div','empty','Aucune activité trouvée pour cette recherche.'));}
-function normalizeRepo(r){const meta=Object.assign({name:r.name,description:r.description||''},classify(r));let pages='';if(r.has_pages){pages=(r.homepage&&/^https:\/\//i.test(r.homepage))?r.homepage:'https://'+user.toLowerCase()+'.github.io/'+encodeURIComponent(r.name)+'/';}return {...r,meta,pages};}
-const fallback=Object.keys(catalog).map(name=>normalizeRepo({name,html_url:'https://github.com/'+user+'/'+encodeURIComponent(name),has_pages:false,description:''}));
-async function load(){document.getElementById('status').textContent='Actualisation des dépôts publics…';try{const res=await fetch('https://api.github.com/users/'+user+'/repos?per_page=100&sort=updated',{headers:{'Accept':'application/vnd.github+json'}});if(!res.ok)throw Error('HTTP '+res.status);const data=await res.json();repos=data.filter(r=>!r.archived).map(normalizeRepo);document.getElementById('status').textContent=repos.length+' projet(s) public(s) trouvé(s) · Les nouvelles créations apparaissent automatiquement après actualisation.';}catch(e){repos=fallback;document.getElementById('status').textContent='Connexion GitHub momentanément indisponible : affichage des 6 projets déjà identifiés. Les liens « Voir le projet » restent accessibles.';}render();}
-document.getElementById('search').addEventListener('input',e=>{term=e.target.value;render();});document.getElementById('refresh').onclick=load;repos=fallback;render();load();
+const levelLabels = {'6e':'6ème', '5e':'5ème', '3e':'3ème', '2nde':'2nde', '1ere':'1ère'};
+const account = 'MissTeacherNad';
+
+// Affectations prioritaires. Une activité commune peut apparaître dans plusieurs niveaux.
+// Pour une nouvelle activité sans niveau dans le nom, l'ajouter ici.
+const catalog = {
+  'Lecture-debutant': {name:'Lecture débutant',levels:['6e'],type:'Lecture'},
+  'NigeriaReview': {name:'Nigeria on the Move',levels:['2nde'],type:'Révisions'},
+  'TheInvisibleBorder': {name:'The Invisible Border',levels:['1ere'],type:'Révisions'},
+  'atom-lockdown': {name:'Atom Lockdown',levels:['2nde','1ere'],type:'DNL physique-chimie'},
+  'periodic-table-trainer': {name:'Periodic Table Trainer',levels:['2nde','1ere'],type:'DNL physique-chimie'},
+  'GramLab': {name:'GramLab',levels:['5e','3e','2nde','1ere'],type:'Verbes irréguliers'},
+  'VerbesIrreg': {name:'Verbes irréguliers',levels:['5e','3e','2nde','1ere'],type:'Verbes irréguliers'}
+};
+const ignored = new Set(['liens']);
+const knownFallback = ['Lecture-debutant','NigeriaReview','TheInvisibleBorder','atom-lockdown','periodic-table-trainer'];
+const sections = document.getElementById('sections');
+const status = document.getElementById('status');
+let unlockedLevel = null;
+let currentRepos = [];
+let query = '';
+
+function normal(x) {return String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
+function element(tag,className,text) {const e=document.createElement(tag);if(className)e.className=className;if(text!==undefined)e.textContent=text;return e;}
+function gradeFromText(text) {
+  const s=normal(text);
+  const grades=[];
+  if(/6(?:eme|e|th)(?![a-z0-9])|sixieme/.test(s))grades.push('6e');
+  if(/5(?:eme|e|th)(?![a-z0-9])|cinquieme/.test(s))grades.push('5e');
+  if(/3(?:eme|e|rd)(?![a-z0-9])|troisieme/.test(s))grades.push('3e');
+  if(/2nde|seconde|secondes|2(?:eme|e)(?![a-z0-9])/.test(s))grades.push('2nde');
+  if(/1ere|premiere|premieres|1(?:eme|e)(?![a-z0-9])/.test(s))grades.push('1ere');
+  return grades;
+}
+function classify(repo) {
+  if(ignored.has(normal(repo.name)))return null;
+  if(Object.prototype.hasOwnProperty.call(catalog,repo.name)) {
+    return {...catalog[repo.name],description:repo.description||'Activité de révision.'};
+  }
+  const name=normal(repo.name).replace(/[-_]/g,' ');
+  const desc=normal(repo.description||'');
+  let levels=[...new Set([...gradeFromText(name),...gradeFromText(desc)])];
+  let type='Activité interactive';
+  if(/spyschool|spy school|spies|goldfist|recruit|johnny english|spy\b/.test(name)) {levels=['3e'];type='Spies · Révisions';}
+  else if(/nigeria|lagos|afrobeats|nollywood|joe|diner|english tenses/.test(name)) {levels=['2nde'];type='Révisions';}
+  else if(/nonsense|fool|harriet|invisible border|invisibleborder/.test(name)) {levels=['1ere'];type='Révisions';}
+  else if(/addams|wednesday|manor/.test(name) && !levels.length) {levels=['6e'];type='Révisions';}
+  else if(/atom|periodic|dilution|dissolution|chemistry|lab mix/.test(name)) {levels=['2nde','1ere'];type='DNL physique-chimie';}
+  else if(/gramlab|irregular|irreg|verbs/.test(name)) {levels=['5e','3e','2nde','1ere'];type='Grammaire';}
+  else if(/halloween/.test(name))type='Halloween';
+  else if(/grammar|grammaire|tenses/.test(name))type='Grammaire';
+  if(!levels.length)return null;  // Ne pas montrer par erreur les dépôts sans niveau identifié.
+  return {name:repo.name.replace(/[-_]/g,' '),levels,type,description:repo.description||'Activité interactive pour réviser.'};
+}
+function repoToItem(repo) {
+  const meta=classify(repo);
+  if(!meta)return null;
+  const published = Boolean(repo.has_pages);
+  const homepage=(typeof repo.homepage==='string' && /^https:\/\//i.test(repo.homepage))?repo.homepage:'';
+  const page=published?(homepage||'https://'+account.toLowerCase()+'.github.io/'+encodeURIComponent(repo.name)+'/') : homepage;
+  return {name:repo.name,meta,page,repository:repo.html_url||''};
+}
+function showStatus(text) {status.textContent=text;}
+function render() {
+  if(!unlockedLevel)return;
+  const matched=currentRepos.filter(r=>r.meta.levels.includes(unlockedLevel) && normal([r.meta.name,r.meta.type,r.meta.description].join(' ')).includes(normal(query)));
+  const root=document.createDocumentFragment();
+  const heading=element('section','section');
+  const header=element('div','section-header');
+  header.append(element('h3','',query?'Résultats':'Activités à découvrir'));
+  header.append(element('div','section-count',matched.length+' activité'+(matched.length>1?'s':'')));
+  heading.append(header);
+  if(!matched.length) {
+    heading.append(element('div','empty',query?'Aucune activité ne correspond à cette recherche.':'Aucune activité publiée trouvée pour ce niveau. Si tu attendais une ressource, signale-le à ton professeur.'));
+  } else {
+    const cards=element('div','cards');
+    for(const item of matched) {
+      const card=element('article','card');
+      card.append(element('div','tag',item.meta.type));
+      card.append(element('h4','',item.meta.name));
+      card.append(element('p','',item.meta.description));
+      if(item.page) {
+        const link=element('a','','Ouvrir l’activité ↗');link.href=item.page;link.target='_blank';link.rel='noopener noreferrer';card.append(link);
+      } else {
+        card.append(element('span','tag','Lien non publié ou indisponible'));
+      }
+      cards.append(card);
+    }
+    heading.append(cards);
+  }
+  root.append(heading);sections.replaceChildren(root);
+}
+function showLibrary(level) {
+  unlockedLevel=level;query='';document.getElementById('search').value='';
+  document.getElementById('level-name').textContent=levelLabels[level];
+  document.getElementById('gate').hidden=true;
+  document.getElementById('library').classList.add('on');
+  document.getElementById('error').textContent='';
+  document.getElementById('code').value='';
+  currentRepos=[];
+  render();
+  load();
+}
+async function hash(text) {
+  if(!window.crypto || !window.crypto.subtle)throw new Error('HTTPS nécessaire');
+  const digest=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+document.getElementById('code-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const input=document.getElementById('code');
+  const button=e.currentTarget.querySelector('button');
+  const error=document.getElementById('error');
+  button.disabled=true;error.textContent='';
+  try {
+    const digest=await hash(input.value.trim());
+    const grade=Object.keys(codeHashes).find(k=>codeHashes[k]===digest);
+    if(grade)showLibrary(grade);
+    else {error.textContent='Code non reconnu. Vérifie les 4 chiffres saisis.';input.select();}
+  }catch {error.textContent='Impossible de vérifier le code. Ouvre cette page avec une connexion HTTPS.';}
+  finally {button.disabled=false;}
+});
+document.getElementById('logout').addEventListener('click',()=>{
+  unlockedLevel=null;currentRepos=[];sections.replaceChildren();
+  document.getElementById('library').classList.remove('on');
+  document.getElementById('gate').hidden=false;
+  document.getElementById('code').focus();
+});
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value;render();});
+document.getElementById('refresh').addEventListener('click',load);
+function fallbackRepos() {
+  return knownFallback.map(name=>({name,description:'',has_pages:['atom-lockdown','periodic-table-trainer'].includes(name),homepage:'',html_url:'https://github.com/'+account+'/'+encodeURIComponent(name)})).map(repoToItem).filter(Boolean);
+}
+async function load() {
+  if(!unlockedLevel)return;
+  const grade=unlockedLevel;
+  showStatus('Recherche des activités publiées…');
+  try {
+    const response=await fetch('https://api.github.com/users/'+encodeURIComponent(account)+'/repos?per_page=100&sort=updated',{headers:{Accept:'application/vnd.github+json'},cache:'no-store'});
+    if(!response.ok)throw new Error('GitHub '+response.status);
+    const data=await response.json();
+    if(grade!==unlockedLevel)return;
+    currentRepos=data.filter(r=>!r.archived && !r.fork).map(repoToItem).filter(Boolean);
+    currentRepos.sort((a,b)=>(a.meta.name||a.name).localeCompare(b.meta.name||b.name,'fr'));
+    showStatus('Bibliothèque mise à jour à partir de tes activités GitHub publiques.');
+  }catch(error) {
+    if(grade!==unlockedLevel)return;
+    currentRepos=fallbackRepos();
+    showStatus('GitHub est momentanément indisponible. Affichage partiel des projets connus ; réessaie avec « Actualiser ».');
+  }
+  render();
+}
 </script>
-</body></html>
+</body>
+</html>
