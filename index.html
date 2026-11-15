@@ -134,6 +134,11 @@ const account = 'MissTeacherNad';
 const catalog = {
   'NigeriaReview': {name:'Nigeria on the Move',levels:['2nde-anglais'],type:'Révisions'},
   'TheInvisibleBorder': {name:'The Invisible Border',levels:['1ere-anglais'],type:'Révisions'},
+  'EnglishTenses': {name:'English Tenses',levels:['2nde-anglais','1ere-anglais'],type:'Grammaire'},
+  'English-Tenses': {name:'English Tenses',levels:['2nde-anglais','1ere-anglais'],type:'Grammaire'},
+  '2nde-Grammar-Game': {name:'2nde Grammar Game',levels:['2nde-anglais'],type:'Grammaire'},
+  '2ndeGrammarGame': {name:'2nde Grammar Game',levels:['2nde-anglais'],type:'Grammaire'},
+  'Grammar-Game-2nde': {name:'2nde Grammar Game',levels:['2nde-anglais'],type:'Grammaire'},
   'atom-lockdown': {name:'Atom Lockdown',levels:['2nde-dnl','1ere-dnl'],type:'DNL Physique-Chimie'},
   'periodic-table-trainer': {name:'Periodic Table Challenge',levels:['2nde-dnl','1ere-dnl'],type:'DNL Physique-Chimie'},
   'GramLab': {name:'GramLab · Verbes irréguliers',levels:['5e','3e','2nde-anglais','1ere-anglais'],type:'Verbes irréguliers'},
@@ -167,6 +172,24 @@ function classify(repo) {
   const desc=normal(repo.description||'');
   // Un dépôt personnel de lecture ne doit jamais être classé en 6ème.
   if(ignored.has(compact)||/^lecturedebutant/.test(compact))return null;
+  // Les temps anglais sont partagés en 2nde et 1ère, même si un dépôt porte « 2nde » dans son nom.
+  if(/englishtenses|tensesenglish/.test(compact) || /\benglish[ -]+tenses\b/.test(desc)) {
+    return {name:'English Tenses',levels:['2nde-anglais','1ere-anglais'],type:'Grammaire',description:repo.description||'Réviser les temps de l’anglais.'};
+  }
+  // « The Art of Nonsense » sans numéro est le corrigé, pas une activité.
+  // Les projets numérotés 1, 2, etc. sont les activités des séances.
+  const nonsense=compact.match(/^theartofnonsense(?:(?:activity|activite|seance|session|lesson|part|page)?([1-9][0-9]*))?$/);
+  if(nonsense) {
+    const num=nonsense[1];
+    return num
+      ? {name:'The Art of Nonsense '+num,levels:['1ere-anglais'],type:'Activité',description:repo.description||'Activité '+num+' de la séquence The Art of Nonsense.'}
+      : {name:'Correction – The Art of Nonsense',levels:['1ere-anglais'],type:'Correction',description:'Correction des activités de la séquence The Art of Nonsense.'};
+  }
+  // Le jeu de grammaire de 2nde reste réservé à la 2nde – Anglais.
+  // Le nom du dépôt peut employer des tirets, des espaces ou des majuscules.
+  if(/^(?:(?:2nde|seconde|secondes)grammargame|grammargame(?:2nde|seconde|secondes))$/.test(compact)) {
+    return {name:'2nde Grammar Game',levels:['2nde-anglais'],type:'Grammaire',description:repo.description||'Jeu de révision de grammaire en 2nde.'};
+  }
   if(Object.prototype.hasOwnProperty.call(catalog,repo.name)) {
     return {...catalog[repo.name],description:repo.description||'Activité de révision.'};
   }
@@ -215,7 +238,7 @@ const folderDefinitions = {
   '2nde-anglais': [
     {id:'nigeria', title:'Séquence 1 – Nigeria on the Move', short:'Activités et révisions de la séquence', icon:'📚'},
     {id:'joes', title:'Séquence 2 – Let’s Meet at Joe’s', short:'The American diner', icon:'📚'},
-    {id:'grammar', title:'Grammaire', short:'GramLab et English Tenses', icon:'✏️'},
+    {id:'grammar', title:'Grammaire', short:'GramLab, English Tenses et 2nde Grammar Game', icon:'✏️'},
     {id:'celebrations', title:'Celebrations', short:'Halloween, Thanksgiving, Christmas…', icon:'🎉'}
   ],
   '1ere-anglais': [
@@ -228,11 +251,12 @@ function prettyName(name, fallback) {
   const compact=normal(name).replace(/[^a-z0-9]/g,'');
   if(/(?:gramlab|verbesirreg|verbesirreguliers)/.test(compact))return 'GramLab – Verbes irréguliers';
   if(/englishtenses/.test(compact))return 'English Tenses';
+  if(/^(?:(?:2nde|seconde|secondes)grammargame|grammargame(?:2nde|seconde|secondes))$/.test(compact))return '2nde Grammar Game';
   if(/nigeria/.test(compact))return 'Nigeria on the Move';
   if(/invisibleborder/.test(compact))return 'The Invisible Border';
-  if(/theartofnonsense/.test(compact)) {
-    const number=compact.match(/theartofnonsense(?:seance|session|lesson|part)?([1-9][0-9]*)$/);
-    return 'The Art of Nonsense'+(number?' '+number[1]:'');
+  if(/^theartofnonsense/.test(compact)) {
+    const number=compact.match(/^theartofnonsense(?:(?:activity|activite|seance|session|lesson|part|page)?([1-9][0-9]*))?$/);
+    if(number) return number[1]?'The Art of Nonsense '+number[1]:'Correction – The Art of Nonsense';
   }
   if(/letsmeetatjoes|letsmeetatjoe|meetatjoes/.test(compact))return 'Let’s Meet at Joe’s';
   if(/atomlockdown/.test(compact))return 'Atom Lockdown';
@@ -245,7 +269,7 @@ function folderFor(item, level) {
   const itemName=normal(item.meta.name).replace(/[^a-z0-9]/g,'');
   const k=repoName+' '+itemName;
   if(level==='2nde-anglais') {
-    if(/gramlab|verbesirreg|englishtenses/.test(k))return 'grammar';
+    if(/gramlab|verbesirreg|englishtenses|grammargame/.test(k))return 'grammar';
     if(/halloween|thanksgiving|christmas|noel|xmas|easter|celebration/.test(k))return 'celebrations';
     if(/nigeria|lagos|afrobeats|nollywood|adire|chimamanda/.test(k))return 'nigeria';
     if(/joes|diner|letsmeetatjoe/.test(k))return 'joes';
@@ -327,6 +351,13 @@ function render() {
       root.append(title);
       root.append(element('p','folder-description',definition.short));
       const selected=all.filter(item=>folderFor(item,unlockedLevel)===currentFolder&&itemMatches(item,query));
+      if(currentFolder==='nonsense') {
+        const rank=item=>{
+          const match=normal(item.meta.name).match(/the art of nonsense ([0-9]+)/);
+          return match?Number(match[1]):item.meta.type==='Correction'?10000:9999;
+        };
+        selected.sort((a,b)=>rank(a)-rank(b)||a.meta.name.localeCompare(b.meta.name,'fr'));
+      }
       root.append(makeCards(selected));
     }
   } else {
