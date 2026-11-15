@@ -52,11 +52,23 @@
     .card p {font-size:.86rem;line-height:1.5;color:var(--muted);margin:0;flex:1}
     .card a {align-self:flex-start;display:inline-block;background:#eaf0f5;color:#294e6e;text-decoration:none;border-radius:8px;padding:9px 12px;font-size:.82rem;font-weight:700}
     .card a:hover {background:#d9e6f0}
+    .back-button {display:inline-flex;align-items:center;gap:7px;margin:0 0 13px;padding:8px 12px;border:1px solid var(--line);border-radius:9px;background:white;color:var(--navy);font-weight:700}
+    .back-button:hover {background:#edf1f5}
+    .folder-list {display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:23px 0}
+    .folder-card {border:1px solid var(--line);border-radius:14px;background:#fff;padding:20px;text-align:left;display:flex;align-items:center;gap:15px;width:100%;min-height:110px;box-shadow:0 2px 3px #293c5306}
+    .folder-card:hover,.folder-card:focus-visible {border-color:#7e9bb5;background:#fbfcfe}
+    .folder-symbol {width:48px;height:48px;min-width:48px;display:grid;place-items:center;background:#eaf0f5;border-radius:12px;font-size:1.35rem;color:var(--navy)}
+    .folder-content {min-width:0;flex:1}
+    .folder-title {font-size:1.03rem;font-weight:750;line-height:1.4;color:var(--ink)}
+    .folder-detail {font-size:.82rem;color:var(--muted);margin-top:4px}
+    .folder-chevron {font-size:1.35rem;color:var(--muted)}
+    .folder-heading {font:normal 1.75rem Georgia,"Times New Roman",serif;margin:9px 0 2px}
+    .folder-description {color:var(--muted);font-size:.88rem;margin:0 0 14px}
     .status {color:var(--muted);font-size:.85rem;margin-top:13px}
     .empty {padding:27px 20px;background:white;border:1px dashed #c5d2dc;border-radius:12px;color:var(--muted)}
     footer {background:white;border-top:1px solid var(--line);padding:21px 0;color:var(--muted);font-size:.75rem}
     [hidden] {display:none!important}
-    @media(max-width:570px) {.gate{padding:24px 19px;margin-top:5px}.code-row{flex-direction:column}.code-row .button{width:100%}.topbar{align-items:flex-start;flex-direction:column}.toolbar,.toolbar .search{width:100%}.cards{grid-template-columns:1fr}header{padding-top:25px}}
+    @media(max-width:570px) {.gate{padding:24px 19px;margin-top:5px}.code-row{flex-direction:column}.code-row .button{width:100%}.topbar{align-items:flex-start;flex-direction:column}.toolbar,.toolbar .search{width:100%}.cards{grid-template-columns:1fr}header{padding-top:25px}.folder-list{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -64,7 +76,7 @@
   <div class="wrap">
     <div class="eyebrow">English classroom · Miss Yahia · 2026/2027</div>
     <h1>Jeux & révisions</h1>
-    <p class="intro">Tes activités d'anglais et de DNL au même endroit, pour réviser à ton rythme.</p>
+    <p class="intro">Tes séquences, tes activités d’anglais et de DNL réunies au même endroit.</p>
   </div>
 </header>
 <main class="wrap">
@@ -92,6 +104,7 @@
       <input id="search" class="search" type="search" placeholder="Rechercher une séquence, une notion…" aria-label="Rechercher une activité">
       <button id="refresh" type="button" class="button secondary">↻ Actualiser</button>
     </div>
+    <button id="back" class="back-button" type="button" hidden>‹ Retour aux dossiers</button>
     <p id="status" class="status" role="status">Chargement des activités…</p>
     <div id="sections"></div>
   </section>
@@ -134,6 +147,7 @@ const status = document.getElementById('status');
 let unlockedLevel = null;
 let currentRepos = [];
 let query = '';
+let currentFolder = null;
 
 function normal(x) {return String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
 function element(tag,className,text) {const e=document.createElement(tag);if(className)e.className=className;if(text!==undefined)e.textContent=text;return e;}
@@ -175,7 +189,7 @@ function classify(repo) {
   if(/spyschool|spyschool|spies|goldfist|recruit|johnnyenglish|spy\b/.test(compact)) {
     return {name:repo.name.replace(/[-_]/g,' '),levels:['3e'],type:'Spies · Révisions',description:repo.description||'Activité interactive pour réviser.'};
   }
-  if(/nigeria|lagos|afrobeats|nollywood|joe|diner/.test(compact)) {
+  if(/nigeria|lagos|afrobeats|nollywood|joes|diner|letsmeetatjoe/.test(compact)) {
     return {name:repo.name.replace(/[-_]/g,' '),levels:['2nde-anglais'],type:'Révisions',description:repo.description||'Activité interactive pour réviser.'};
   }
   if(/nonsense|fool|harriet|invisibleborder/.test(compact)) {
@@ -191,50 +205,143 @@ function classify(repo) {
   }
   if(!levels.length)return null; // Ne pas ajouter un projet au mauvais niveau.
   let type=dnl?'DNL Physique-Chimie':'Activité interactive';
-  if(/halloween/.test(name))type='Halloween';
+  if(/halloween|thanksgiving|christmas|noel|xmas|easter/.test(name))type='Celebrations';
   else if(/grammar|grammaire|tenses/.test(name))type='Grammaire';
   return {name:repo.name.replace(/[-_]/g,' '),levels,type,description:repo.description||'Activité interactive pour réviser.'};
+}
+// Regroupement pédagogique : les dossiers n'affectent PAS l'adresse des projets.
+// Les activités sont repérées automatiquement à partir du nom de leur dépôt.
+const folderDefinitions = {
+  '2nde-anglais': [
+    {id:'nigeria', title:'Séquence 1 – Nigeria on the Move', short:'Activités et révisions de la séquence', icon:'📚'},
+    {id:'joes', title:'Séquence 2 – Let’s Meet at Joe’s', short:'The American diner', icon:'📚'},
+    {id:'grammar', title:'Grammaire', short:'GramLab et English Tenses', icon:'✏️'},
+    {id:'celebrations', title:'Celebrations', short:'Halloween, Thanksgiving, Christmas…', icon:'🎉'}
+  ],
+  '1ere-anglais': [
+    {id:'border', title:'Séquence 1 – The Invisible Border', short:'Documents et révisions', icon:'📚'},
+    {id:'nonsense', title:'Séquence 2 – The Art of Nonsense', short:'Toutes les séances dans un même dossier', icon:'📚'},
+    {id:'grammar', title:'Grammaire', short:'GramLab et English Tenses', icon:'✏️'}
+  ]
+};
+function prettyName(name, fallback) {
+  const compact=normal(name).replace(/[^a-z0-9]/g,'');
+  if(/(?:gramlab|verbesirreg|verbesirreguliers)/.test(compact))return 'GramLab – Verbes irréguliers';
+  if(/englishtenses/.test(compact))return 'English Tenses';
+  if(/nigeria/.test(compact))return 'Nigeria on the Move';
+  if(/invisibleborder/.test(compact))return 'The Invisible Border';
+  if(/theartofnonsense/.test(compact)) {
+    const number=compact.match(/theartofnonsense(?:seance|session|lesson|part)?([1-9][0-9]*)$/);
+    return 'The Art of Nonsense'+(number?' '+number[1]:'');
+  }
+  if(/letsmeetatjoes|letsmeetatjoe|meetatjoes/.test(compact))return 'Let’s Meet at Joe’s';
+  if(/atomlockdown/.test(compact))return 'Atom Lockdown';
+  if(/periodictable/.test(compact))return 'Periodic Table Challenge';
+  if(/operationgoldfist/.test(compact))return 'Operation Goldfist';
+  return fallback;
+}
+function folderFor(item, level) {
+  const repoName=normal(item.name).replace(/[^a-z0-9]/g,'');
+  const itemName=normal(item.meta.name).replace(/[^a-z0-9]/g,'');
+  const k=repoName+' '+itemName;
+  if(level==='2nde-anglais') {
+    if(/gramlab|verbesirreg|englishtenses/.test(k))return 'grammar';
+    if(/halloween|thanksgiving|christmas|noel|xmas|easter|celebration/.test(k))return 'celebrations';
+    if(/nigeria|lagos|afrobeats|nollywood|adire|chimamanda/.test(k))return 'nigeria';
+    if(/joes|diner|letsmeetatjoe/.test(k))return 'joes';
+  }
+  if(level==='1ere-anglais') {
+    if(/gramlab|verbesirreg|englishtenses/.test(k))return 'grammar';
+    if(/invisibleborder|harriet|undergroundrailroad/.test(k))return 'border';
+    if(/nonsense|thefool|foolsgame/.test(k))return 'nonsense';
+  }
+  return 'other';
 }
 function repoToItem(repo) {
   const meta=classify(repo);
   if(!meta)return null;
-  const published = Boolean(repo.has_pages);
+  const published=Boolean(repo.has_pages);
   const homepage=(typeof repo.homepage==='string' && /^https:\/\//i.test(repo.homepage))?repo.homepage:'';
   const page=published?(homepage||'https://'+account.toLowerCase()+'.github.io/'+encodeURIComponent(repo.name)+'/') : homepage;
+  meta.name=prettyName(repo.name,meta.name);
   return {name:repo.name,meta,page,repository:repo.html_url||''};
 }
-function showStatus(text) {status.textContent=text;}
+function showStatus(message) {status.textContent=message;}
+function availableItems() {
+  return currentRepos.filter(r=>r.meta.levels.includes(unlockedLevel));
+}
+function itemMatches(item,text) {
+  return normal([item.meta.name,item.meta.type,item.meta.description].join(' ')).includes(normal(text));
+}
+function makeCards(items) {
+  if(!items.length)return element('div','empty',query?'Aucune activité ne correspond à cette recherche.':'Aucune activité publiée dans ce dossier pour le moment.');
+  const cards=element('div','cards');
+  for(const item of items) {
+    const card=element('article','card');
+    card.append(element('div','tag',item.meta.type));
+    card.append(element('h4','',item.meta.name));
+    card.append(element('p','',item.meta.description));
+    if(item.page) {
+      const link=element('a','','Ouvrir l’activité ↗');
+      link.href=item.page;link.target='_blank';link.rel='noopener noreferrer';
+      card.append(link);
+    }else card.append(element('span','tag','Lien non publié ou indisponible'));
+    cards.append(card);
+  }
+  return cards;
+}
 function render() {
   if(!unlockedLevel)return;
-  const matched=currentRepos.filter(r=>r.meta.levels.includes(unlockedLevel) && normal([r.meta.name,r.meta.type,r.meta.description].join(' ')).includes(normal(query)));
+  const definitions=folderDefinitions[unlockedLevel];
+  const back=document.getElementById('back');
+  back.hidden=!(definitions&&currentFolder);
+  const all=availableItems();
   const root=document.createDocumentFragment();
-  const heading=element('section','section');
-  const header=element('div','section-header');
-  header.append(element('h3','',query?'Résultats':'Activités à découvrir'));
-  header.append(element('div','section-count',matched.length+' activité'+(matched.length>1?'s':'')));
-  heading.append(header);
-  if(!matched.length) {
-    heading.append(element('div','empty',query?'Aucune activité ne correspond à cette recherche.':'Aucune activité publiée trouvée pour ce niveau. Si tu attendais une ressource, signale-le à ton professeur.'));
-  } else {
-    const cards=element('div','cards');
-    for(const item of matched) {
-      const card=element('article','card');
-      card.append(element('div','tag',item.meta.type));
-      card.append(element('h4','',item.meta.name));
-      card.append(element('p','',item.meta.description));
-      if(item.page) {
-        const link=element('a','','Ouvrir l’activité ↗');link.href=item.page;link.target='_blank';link.rel='noopener noreferrer';card.append(link);
-      } else {
-        card.append(element('span','tag','Lien non publié ou indisponible'));
+  if(definitions) {
+    if(!currentFolder) {
+      // Vue d'ensemble : quatre dossiers de 2nde, trois dossiers de 1ère.
+      const list=element('div','folder-list');
+      const definitionsWithOther=[...definitions];
+      if(all.some(item=>folderFor(item,unlockedLevel)==='other'))
+        definitionsWithOther.push({id:'other',title:'Autres activités',short:'Ressources complémentaires',icon:'📎'});
+      let visibleFolders=0;
+      for(const folder of definitionsWithOther) {
+        const group=all.filter(item=>folderFor(item,unlockedLevel)===folder.id);
+        const relevant=group.filter(item=>itemMatches(item,query));
+        if(query&&!relevant.length&&!normal(folder.title+' '+folder.short).includes(normal(query)))continue;
+        const card=element('button','folder-card');card.type='button';
+        card.setAttribute('aria-label','Ouvrir le dossier '+folder.title);
+        card.append(element('div','folder-symbol',folder.icon));
+        const inside=element('div','folder-content');
+        inside.append(element('div','folder-title',folder.title));
+        inside.append(element('div','folder-detail',group.length+' activité'+(group.length>1?'s':'')+' · '+folder.short));
+        card.append(inside);card.append(element('span','folder-chevron','›'));
+        card.addEventListener('click',()=>{currentFolder=folder.id;query='';document.getElementById('search').value='';render();window.scrollTo({top:0,behavior:'instant'});});
+        list.append(card);visibleFolders++;
       }
-      cards.append(card);
+      root.append(visibleFolders?list:element('div','empty','Aucun dossier ne correspond à cette recherche.'));
+    } else {
+      const definition=[...definitions,{id:'other',title:'Autres activités',short:'Ressources complémentaires'}].find(f=>f.id===currentFolder);
+      if(!definition) {currentFolder=null;render();return;}
+      const title=element('h3','folder-heading',definition.title);
+      root.append(title);
+      root.append(element('p','folder-description',definition.short));
+      const selected=all.filter(item=>folderFor(item,unlockedLevel)===currentFolder&&itemMatches(item,query));
+      root.append(makeCards(selected));
     }
-    heading.append(cards);
+  } else {
+    // Les autres niveaux conservent leur liste simple.
+    const matched=all.filter(item=>itemMatches(item,query));
+    const section=element('section','section');
+    const head=element('div','section-header');
+    head.append(element('h3','',query?'Résultats':'Mes activités'));
+    head.append(element('div','section-count',matched.length+' activité'+(matched.length>1?'s':'')));
+    section.append(head);section.append(makeCards(matched));root.append(section);
   }
-  root.append(heading);sections.replaceChildren(root);
+  sections.replaceChildren(root);
 }
 function showLibrary(level) {
-  unlockedLevel=level;query='';document.getElementById('search').value='';
+  unlockedLevel=level;query='';currentFolder=null;document.getElementById('search').value='';
   document.getElementById('level-name').textContent=levelLabels[level];
   document.getElementById('gate').hidden=true;
   document.getElementById('library').classList.add('on');
@@ -264,15 +371,16 @@ document.getElementById('code-form').addEventListener('submit',async e=>{
   finally {button.disabled=false;}
 });
 document.getElementById('logout').addEventListener('click',()=>{
-  unlockedLevel=null;currentRepos=[];sections.replaceChildren();
+  unlockedLevel=null;currentRepos=[];currentFolder=null;sections.replaceChildren();
   document.getElementById('library').classList.remove('on');
   document.getElementById('gate').hidden=false;
   document.getElementById('code').focus();
 });
 document.getElementById('search').addEventListener('input',e=>{query=e.target.value;render();});
 document.getElementById('refresh').addEventListener('click',load);
+document.getElementById('back').addEventListener('click',()=>{currentFolder=null;query='';document.getElementById('search').value='';render();});
 function fallbackRepos() {
-  return knownFallback.map(name=>({name,description:'',has_pages:['atom-lockdown','periodic-table-trainer'].includes(name),homepage:'',html_url:'https://github.com/'+account+'/'+encodeURIComponent(name)})).map(repoToItem).filter(Boolean);
+  return []; // Ne pas inventer des liens ou présumer qu'une activité est publiée.
 }
 async function load() {
   if(!unlockedLevel)return;
@@ -294,7 +402,7 @@ async function load() {
   }catch(error) {
     if(grade!==unlockedLevel)return;
     currentRepos=fallbackRepos();
-    showStatus('GitHub est momentanément indisponible. Affichage partiel des projets connus ; réessaie avec « Actualiser ».');
+    showStatus('Impossible de joindre GitHub actuellement. Vérifie la connexion et réessaie avec « Actualiser ».');
   }
   render();
 }
